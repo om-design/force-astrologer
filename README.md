@@ -1,5 +1,7 @@
 # force-astrologer
 Astrology with an influence from far away and long ago...
+![image](https://github.com/user-attachments/assets/eb539af0-b4fd-4341-afe7-a6ebf80ea6d9)
+
 
 # Force Astrologer MCP
 
