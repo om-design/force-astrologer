@@ -1,0 +1,71 @@
+{
+  "name": "Force Astrologer",
+  "description": "A novelty astrology MCP server inspired by space fantasy. Generates personalized charts, horoscopes, compatibility readings, and lore using a unique cosmic archetype system. For entertainment purposes only.",
+  "version": "1.0.0",
+  "disclaimer": "Force Astrologer is a fan-created novelty service, not affiliated with or endorsed by any existing franchise. All names, lore, and archetypes are original or parodic, and intended for entertainment purposes only.",
+  "tools": [
+    {
+      "name": "generate_chart",
+      "description": "Generate a Force astrology chart from birth data.",
+      "parameters": {
+        "name": { "type": "string", "description": "User's name (optional)", "required": false },
+        "birth_date": { "type": "string", "format": "date", "description": "Birth date in YYYY-MM-DD format", "required": true },
+        "birth_time": { "type": "string", "format": "time", "description": "Birth time in HH:MM format (optional)", "required": false },
+        "birth_location": { "type": "string", "description": "Birth location (optional)", "required": false }
+      },
+      "returns": {
+        "sign": { "type": "string", "description": "Primary Force sign" },
+        "planets": { "type": "object", "description": "Planetary placements and their archetypes" },
+        "houses": { "type": "object", "description": "House placements and their archetypes" },
+        "lore": { "type": "string", "description": "Narrative lore for the chart" }
+      }
+    },
+    {
+      "name": "get_horoscope",
+      "description": "Get a daily, weekly, or monthly horoscope for a Force sign.",
+      "parameters": {
+        "sign": { "type": "string", "description": "Force sign", "required": true },
+        "period": { "type": "string", "enum": ["daily", "weekly", "monthly"], "description": "Horoscope period", "required": true }
+      },
+      "returns": {
+        "horoscope": { "type": "string", "description": "Horoscope text" }
+      }
+    },
+    {
+      "name": "compatibility",
+      "description": "Analyze compatibility between two Force signs.",
+      "parameters": {
+        "sign1": { "type": "string", "description": "First Force sign", "required": true },
+        "sign2": { "type": "string", "description": "Second Force sign", "required": true }
+      },
+      "returns": {
+        "score": { "type": "integer", "description": "Compatibility score (0-100)" },
+        "narrative": { "type": "string", "description": "Compatibility narrative" }
+      }
+    },
+    {
+      "name": "explain_sign",
+      "description": "Get the lore and archetype for a Force sign.",
+      "parameters": {
+        "sign": { "type": "string", "description": "Force sign", "required": true }
+      },
+      "returns": {
+        "lore": { "type": "string", "description": "Sign lore and archetype" }
+      }
+    },
+    {
+      "name": "explain_planet",
+      "description": "Get the lore and energetic meaning for a Force planet.",
+      "parameters": {
+        "planet": { "type": "string", "description": "Force planet", "required": true }
+      },
+      "returns": {
+        "lore": { "type": "string", "description": "Planet lore and energetic meaning" }
+      }
+    }
+  ],
+  "contact": {
+    "email": "omdesign.is@gmail.com",
+    "url": "https://omdesign.is/force-astrologer"
+  }
+}
