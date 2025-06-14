@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Force Astrologer Aspect Visualizer</title>
+  <style>
+    body { background: #181c2b; color: #ffe; font-family: sans-serif; margin: 0; }
+    .container { max-width: 800px; margin: 32px auto; background: #23284a; border-radius: 16px; box-shadow: 0 4px 24px #0008; overflow: hidden; }
+    .solar-system-row { display: flex; position: relative; height: 320px; }
+    .solar-system { flex: 1; }
+    .vertical-nav {
+      width: 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-right: 16px;
+      margin-top: 32px;
+    }
+    .nav-arrow {
+      background: none;
+      border: none;
+      color: #ffb300;
+      font-size: 1.5em;
+      cursor: pointer;
+      margin: 8px 0;
+      transition: color 0.2s;
+    }
+    .nav-arrow:active { color: #ffd54f; }
+    .nav-dot {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      margin: 10px 0;
+      border: 2px solid #fff4;
+      opacity: 0.4;
+      transition: opacity 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      box-shadow: 0 0 8px #0004;
+    }
+    .nav-dot.active {
+      opacity: 1;
+      box-shadow: 0 0 16px #fff, 0 0 8px #00f8;
+      border: 2px solid #fff;
+    }
+    .aspect-details {
+      background: #1a1e33;
+      padding: 32px 24px 24px 24px;
+      border-top: 2px solid #2e3350;
+      min-height: 200px;
+      text-align: center;
+    }
+    .aspect-header { font-size: 1.2em; margin-bottom: 12px; }
+    .aspect-planets { display: flex; justify-content: center; gap: 32px; margin-bottom: 10px; }
+    .aspect-planet { font-weight: bold; }
+    .aspect-combined { margin: 18px 0 8px 0; font-size: 1.1em; color: #ffd54f; }
+    .aspect-timestamp { font-size: 0.9em; color: #aaa; }
+    .disclaimer { font-size: 0.9em; color: #aaa; margin: 24px 0 0 0; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="solar-system-row">
+      <svg id="solar-system" class="solar-system" width="500" height="320"></svg>
+      <div class="vertical-nav" id="vertical-nav"></div>
+    </div>
+    <div class="aspect-details" id="aspect-details"></div>
+  </div>
+  <div class="disclaimer">
+    Force Astrologer is a fan-created novelty service, not affiliated with or endorsed by any existing franchise. For entertainment only.
+  </div>
+  <script>
+    // --- Sample aspect data (replace with your own or load from JSON) ---
+    const planetColors = {
+      "Twin Moons": "#7ecfff",
+      "Red Star": "#ff5e5e",
+      "Green World": "#7fff7e",
+      "Shadow Sphere": "#b47eff",
+      "Golden Dawn": "#ffe07e"
+    };
+    const aspects = [
+      {
+        planet1: "Twin Moons",
+        planet2: "Red Star",
+        aspect: "Conjunction",
+        start: "2024-06-01T00:00:00Z",
+        end: "2024-06-07T12:00:00Z",
+        influence1: "intuition heightened",
+        influence2: "energy surges",
+        combined: "A powerful window for new beginnings and trusting your instincts."
+      },
+      {
+        planet1: "Green World",
+        planet2: "Shadow Sphere",
+        aspect: "Trine",
+        start: "2024-06-02T00:00:00Z",
+        end: "2024-06-05T18:00:00Z",
+        influence1: "growth and healing",
+        influence2: "hidden truths revealed",
+        combined: "A harmonious time for self-discovery and personal growth."
+      },
+      {
+        planet1: "Golden Dawn",
+        planet2: "Twin Moons",
+        aspect: "Square",
+        start: "2024-06-03T00:00:00Z",
+        end: "2024-06-04T23:00:00Z",
+        influence1: "optimism and clarity",
+        influence2: "intuition heightened",
+        combined: "A challenging but rewarding period for making bold decisions."
+      }
+    ];
+
+    // --- Utility functions ---
+    function parseDate(str) { return new Date(str); }
+    function formatTimeLeft(end) {
+      const now = new Date();
+      const ms = parseDate(end) - now;
+      if (ms <= 0) return "Ended";
+      const days = Math.floor(ms / (1000*60*60*24));
+      const hours = Math.floor((ms % (1000*60*60*24)) / (1000*60*60));
+      const mins = Math.floor((ms % (1000*60*60)) / (1000*60));
+      return `${days}d ${hours}h ${mins}m left`;
+    }
+    function formatTimestamp(d) {
+      return d.toISOString().replace("T", " ").slice(0, 16) + " UTC";
+    }
+
+    // --- Filter current aspects ---
+    function getCurrentAspects() {
+      const now = new Date();
+      return aspects.filter(a => parseDate(a.start) <= now && parseDate(a.end) > now);
+    }
+
+    // --- Solar system layout ---
+    function getPlanetPositions(n) {
+      // Place planets evenly on a circle
+      const cx = 250, cy = 160, r = 110;
+      return Array.from({length: n}, (_, i) => {
+        const angle = (2 * Math.PI * i) / n - Math.PI/2;
+        return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+      });
+    }
+
+    // --- State ---
+    let currentAspects = getCurrentAspects();
+    if (currentAspects.length === 0) currentAspects = aspects; // fallback: show all if none active
+    let activeIndex = 0;
+
+    // --- Render solar system ---
+    function renderSolarSystem() {
+      const svg = document.getElementById('solar-system');
+      svg.innerHTML = '';
+      // Sun
+      svg.innerHTML += `<circle cx="250" cy="160" r="28" fill="gold" stroke="#fff" stroke-width="3"/>`;
+      // Planets in aspect
+      const n = currentAspects.length;
+      const positions = getPlanetPositions(n);
+      currentAspects.forEach((a, i) => {
+        const planet = a.planet1;
+        const {x, y} = positions[i];
+        // Sun-to-planet line (active only)
+        if (i === activeIndex) {
+          svg.innerHTML += `
+            <defs>
+              <filter id="blue-glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="blue" />
+              </filter>
+            </defs>
+            <line x1="250" y1="160" x2="${x}" y2="${y}" stroke="white" stroke-width="4" filter="url(#blue-glow)"/>
+          `;
+        }
+        // Planet
+        svg.innerHTML += `
+          <circle
+            cx="${x}" cy="${y}"
+            r="${i === activeIndex ? 16 : 8}"
+            fill="${planetColors[planet] || '#fff'}"
+            opacity="${i === activeIndex ? 1 : 0.4}"
+            stroke="#fff"
+            stroke-width="${i === activeIndex ? 3 : 1}"
+            style="transition: r 0.2s, opacity 0.2s;"
+          />
+          <text x="${x}" y="${y + (i === activeIndex ? 32 : 18)}" text-anchor="middle" fill="#ffe" font-size="0.9em">${planet}</text>
+        `;
+      });
+    }
+
+    // --- Render vertical nav ---
+    function renderNav() {
+      const nav = document.getElementById('vertical-nav');
+      nav.innerHTML = '';
+      nav.innerHTML += `<button class="nav-arrow" onclick="cycleAspect(-1)">&#9650;</button>`;
+      currentAspects.forEach((a, i) => {
+        const planet = a.planet1;
+        nav.innerHTML += `<div class="nav-dot${i === activeIndex ? ' active' : ''}" 
+          style="background:${planetColors[planet] || '#fff'}"
+          onclick="setActive(${i})"></div>`;
+      });
+      nav.innerHTML += `<button class="nav-arrow" onclick="cycleAspect(1)">&#9660;</button>`;
+    }
+
+    // --- Render aspect details ---
+    function renderDetails() {
+      const a = currentAspects[activeIndex];
+      const now = new Date();
+      document.getElementById('aspect-details').innerHTML = `
+        <div class="aspect-header">
+          <b>${a.aspect}</b> (${formatTimeLeft(a.end)})
+        </div>
+        <div class="aspect-planets">
+          <span class="aspect-planet" style="color:${planetColors[a.planet1] || '#fff'}">${a.planet1} - ${a.influence1}</span>
+          <span class="aspect-planet" style="color:${planetColors[a.planet2] || '#fff'}">${a.planet2} - ${a.influence2}</span>
+        </div>
+        <div class="aspect-combined">${a.combined}</div>
+        <div class="aspect-timestamp">Queried at: ${formatTimestamp(now)}</div>
+      `;
+    }
+
+    // --- Navigation logic ---
+    function setActive(i) {
+      activeIndex = i;
+      renderAll();
+    }
+    function cycleAspect(dir) {
+      activeIndex = (activeIndex + dir + currentAspects.length) % currentAspects.length;
+      renderAll();
+    }
+
+    // --- Main render ---
+    function renderAll() {
+      renderSolarSystem();
+      renderNav();
+      renderDetails();
+    }
+
+    // --- Initial render ---
+    renderAll();
+
+    // --- Optional: auto-update time left every minute ---
+    setInterval(renderDetails, 60000);
+  </script>
+</body>
+</html>
