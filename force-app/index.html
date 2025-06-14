@@ -1,1 +1,94 @@
-content
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Force Astrologer Aspects</title>
+  <style>
+    body { background: #181c2b; color: #ffe; font-family: 'Segoe UI', sans-serif; }
+    .container { max-width: 700px; margin: 32px auto; background: #23284a; border-radius: 12px; box-shadow: 0 4px 24px #0008; padding: 32px; }
+    .aspect-row { border-bottom: 1px solid #2e3350; padding: 16px 0; }
+    .aspect-header { font-size: 1.1em; font-weight: bold; color: #ffb300; }
+    .aspect-planets { margin: 8px 0; }
+    .aspect-combined { color: #ffd54f; margin: 8px 0; }
+    .aspect-timestamp { font-size: 0.9em; color: #aaa; }
+    .disclaimer { font-size: 0.9em; color: #aaa; margin: 24px 0 0 0; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌌 Force Astrologer Aspects</h1>
+    <div id="aspects"></div>
+  </div>
+  <div class="disclaimer">
+    Force Astrologer is a fan-created novelty service, not affiliated with or endorsed by any existing franchise. For entertainment only.
+  </div>
+  <script>
+    // Map standard planet names to Force Astrologer names
+    const planetMap = {
+      "Sun": "Solaris",
+      "Moon": "Twin Moons",
+      "Mercury": "Messenger",
+      "Venus": "Green World",
+      "Mars": "Red Star",
+      "Jupiter": "Golden Dawn",
+      "Saturn": "Shadow Sphere",
+      "Uranus": "Skybreaker",
+      "Neptune": "Mystic Veil",
+      "Pluto": "Abyssal Gate"
+    };
+
+    // Optionally, you can add Force-style influences here
+    const planetInfluences = {
+      "Solaris": "vitality and destiny",
+      "Twin Moons": "intuition and dreams",
+      "Messenger": "communication and cleverness",
+      "Green World": "growth and healing",
+      "Red Star": "energy and courage",
+      "Golden Dawn": "expansion and hope",
+      "Shadow Sphere": "discipline and legacy",
+      "Skybreaker": "rebellion and change",
+      "Mystic Veil": "mystery and vision",
+      "Abyssal Gate": "transformation and power"
+    };
+
+    function formatTimeLeft(end) {
+      const now = new Date();
+      const ms = new Date(end) - now;
+      if (ms <= 0) return "Ended";
+      const days = Math.floor(ms / (1000*60*60*24));
+      const hours = Math.floor((ms % (1000*60*60*24)) / (1000*60*60));
+      return `${days}d ${hours}h left`;
+    }
+
+    fetch("../core/current_aspects.json")
+      .then(r => r.json())
+      .then(aspects => {
+        const container = document.getElementById('aspects');
+        container.innerHTML = aspects.map(a => {
+          const p1 = planetMap[a.planet1] || a.planet1;
+          const p2 = planetMap[a.planet2] || a.planet2;
+          const inf1 = planetInfluences[p1] || "";
+          const inf2 = planetInfluences[p2] || "";
+          return `
+            <div class="aspect-row">
+              <div class="aspect-header">
+                ${p1} ${a.aspect} ${p2} (${formatTimeLeft(a.end)})
+              </div>
+              <div class="aspect-planets">
+                <b>${p1}</b>: ${inf1}<br>
+                <b>${p2}</b>: ${inf2}
+              </div>
+              <div class="aspect-combined">
+                For the next <b>${formatTimeLeft(a.end)}</b>, focus on how <b>${inf1}</b> influences <b>${inf2}</b>.<br>
+                This ${a.aspect.toLowerCase()} brings unique opportunities in the Force.
+              </div>
+              <div class="aspect-timestamp">
+                From ${a.start.replace('T',' ').slice(0,16)} to ${a.end.replace('T',' ').slice(0,16)}
+              </div>
+            </div>
+          `;
+        }).join('');
+      });
+  </script>
+</body>
+</html>
