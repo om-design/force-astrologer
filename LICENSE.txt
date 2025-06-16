@@ -9,4 +9,4 @@ This software is proprietary and confidential. By using this software, you agree
 - Commercial use, including use in a paid product or service, is strictly prohibited without prior written permission from the copyright holder.
 - This software is provided "as is," without warranty of any kind.
 
-For commercial licensing, please contact: omdesign.is@gmail.com
+For commercial licensing, please submit an Issue
