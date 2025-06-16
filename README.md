@@ -58,14 +58,7 @@ Clone this repo and follow the instructions in [INSTALL.md](INSTALL.md) to set u
 This software is proprietary and provided for personal, non-commercial use only.  
 See [LICENSE.txt](LICENSE.txt) for details.
 
-For commercial licensing, please contact: [your email/contact info]
-
----
-
-## Contact
-
-Questions, feedback, or licensing inquiries?  
-Email: omdesign.is@gmail.com
+For commercial licensing, please make an Issue.
 
 ---
 
